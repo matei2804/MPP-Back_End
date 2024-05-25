@@ -1,10 +1,14 @@
 package com.example.mppbackend.repository;
 
 import com.example.mppbackend.api.models.Movie;
-import org.springframework.boot.CommandLineRunner;
-import org.springframework.stereotype.Component;
+import com.example.mppbackend.api.models.Role;
 import com.example.mppbackend.api.models.User;
 import com.github.javafaker.Faker;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.stereotype.Component;
+
+import java.util.Optional;
 import java.util.UUID;
 
 @Component
@@ -12,10 +16,14 @@ public class DatabaseLoader implements CommandLineRunner {
 
     private final UserRepository userRepository;
     private final MovieRepository movieRepository;
+    private final RoleRepository roleRepository;
+    private final BCryptPasswordEncoder passwordEncoder;
 
-    public DatabaseLoader(UserRepository userRepository, MovieRepository movieRepository) {
+    public DatabaseLoader(UserRepository userRepository, MovieRepository movieRepository, RoleRepository roleRepository, BCryptPasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.movieRepository = movieRepository;
+        this.roleRepository = roleRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public User generateFakeUser() {
@@ -23,7 +31,7 @@ public class DatabaseLoader implements CommandLineRunner {
         String id = UUID.randomUUID().toString();
         String email = faker.internet().emailAddress();
         String name = faker.name().fullName();
-        return new User(id, email, name, UUID.randomUUID().toString());
+        return new User(id, email, name, passwordEncoder.encode(UUID.randomUUID().toString()));
     }
 
     public Movie generateFakeMovie() {
@@ -47,63 +55,63 @@ public class DatabaseLoader implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
+//        movieRepository.deleteAll();
+//        userRepository.deleteAll();
+//        roleRepository.deleteAll();
+
+        if (roleRepository.count() == 0) {
+            roleRepository.save(new Role("ROLE_USER"));
+            roleRepository.save(new Role("ROLE_MANAGER"));
+            roleRepository.save(new Role("ROLE_ADMIN"));
+        }
+
         if (userRepository.count() == 0) {
-            userRepository.save(new User(UUID.randomUUID().toString(), "alice@example.com", "Alice", "123"));
-            userRepository.save(new User(UUID.randomUUID().toString(), "bob@example.com", "Bob", UUID.randomUUID().toString()));
-            userRepository.save(new User(UUID.randomUUID().toString(), "charlie@example.com", "Charlie", UUID.randomUUID().toString()));
-            userRepository.save(new User(UUID.randomUUID().toString(), "admin@admin.com", "admin", "admin"));
+            Role userRole = roleRepository.findByName("ROLE_USER");
+            Role managerRole = roleRepository.findByName("ROLE_MANAGER");
+            Role adminRole = roleRepository.findByName("ROLE_ADMIN");
+
+            User admin = new User(UUID.randomUUID().toString(), "admin@admin.com", "admin", passwordEncoder.encode("admin"));
+            admin.getRoles().add(adminRole);
+            userRepository.save(admin);
+
+            User manager = new User(UUID.randomUUID().toString(), "manager@manager.com", "manager", passwordEncoder.encode("manager"));
+            manager.getRoles().add(managerRole);
+            userRepository.save(manager);
+
+            User user = new User(UUID.randomUUID().toString(), "user@user.com", "user", passwordEncoder.encode("user"));
+            user.getRoles().add(userRole);
+            userRepository.save(user);
+
             for (int i = 0; i < 100; i++) {
-                User user = generateFakeUser();
-                userRepository.save(user);
+                User fakeUser = generateFakeUser();
+                fakeUser.getRoles().add(userRole);
+                userRepository.save(fakeUser);
             }
         }
 
-        if(movieRepository.count() == 0)
-        {
-            Faker faker = new Faker();
-            User user1 = userRepository.findAll().get(faker.random().nextInt(0, (int) userRepository.count() - 1));
-            User user2 = userRepository.findAll().get(faker.random().nextInt(0, (int) userRepository.count() - 1));
-            User user3 = userRepository.findAll().get(faker.random().nextInt(0, (int) userRepository.count() - 1));
-            User user4 = userRepository.findAll().get(faker.random().nextInt(0, (int) userRepository.count() - 1));
-            User user5 = userRepository.findAll().get(faker.random().nextInt(0, (int) userRepository.count() - 1));
-            User user6 = userRepository.findAll().get(faker.random().nextInt(0, (int) userRepository.count() - 1));
+        if (movieRepository.count() == 0) {
+            Optional<User> user = userRepository.findByEmail("user@user.com");
+            Optional<User> manager = userRepository.findByEmail("manager@manager.com");
+            Optional<User> admin = userRepository.findByEmail("admin@admin.com");
 
-            movieRepository.save(new Movie("1", "The Shawshank Redemption", "Drama", 1994, "https://www.youtube.com/watch?v=NmzuHjWmXOc&ab_channel=RottenTomatoesClassicTrailers", "https://m.media-amazon.com/images/M/MV5BNDE3ODcxYzMtY2YzZC00NmNlLWJiNDMtZDViZWM2MzIxZDYwXkEyXkFqcGdeQXVyNjAwNDUxODI@._V1_.jpg", user1.getId()));
-            movieRepository.save(new Movie("2", "The Godfather", "Crime, Drama", 1972, "https://www.youtube.com/watch?v=sY1S34973zA", "https://m.media-amazon.com/images/M/MV5BM2MyNjYxNmUtYTAwNi00MTYxLWJmNWYtYzZlODY3ZTk3OTFlXkEyXkFqcGdeQXVyNzkwMjQ5NzM@._V1_.jpg", user2.getId()));
-            movieRepository.save(new Movie("3", "Inception", "Action, Adventure, Sci-Fi", 2010, "https://www.youtube.com/watch?v=YoHD9XEInc0", "https://m.media-amazon.com/images/M/MV5BMjAxMzY3NjcxNF5BMl5BanBnXkFtZTcwNTI5OTM0Mw@@._V1_.jpg", user3.getId()));
-            movieRepository.save(new Movie("4", "Forrest Gump", "Drama, Romance", 1994, "https://www.youtube.com/watch?v=bLvqoHBptjg", "https://m.media-amazon.com/images/M/MV5BNWIwODRlZTUtY2U3ZS00Yzg1LWJhNzYtMmZiYmEyNmU1NjMzXkEyXkFqcGdeQXVyMTQxNzMzNDI@._V1_FMjpg_UX1000_.jpg", user4.getId()));
-            movieRepository.save(new Movie("5", "The Matrix", "Action, Sci-Fi", 1999, "https://www.youtube.com/watch?v=m8e-FF8MsqU", "https://m.media-amazon.com/images/M/MV5BNzQzOTk3OTAtNDQ0Zi00ZTVkLWI0MTEtMDllZjNkYzNjNTc4L2ltYWdlXkEyXkFqcGdeQXVyNjU0OTQ0OTY@._V1_.jpg", user5.getId()));
-            movieRepository.save(new Movie("6", "Pulp Fiction", "Crime, Drama", 1994, "https://www.youtube.com/watch?v=s7EdQ4FqbhY", "https://m.media-amazon.com/images/M/MV5BNGNhMDIzZTUtNTBlZi00MTRlLWFjM2ItYzViMjE3YzI5MjljXkEyXkFqcGdeQXVyNzkwMjQ5NzM@._V1_.jpg", user6.getId()));
+            String user_id = user.get().getId();
+            String manager_id = manager.get().getId();
+            String admin_id = admin.get().getId();
 
-            for(int i = 0; i < 10; i++)
-            {
-                movieRepository.save(generateFakeMovie());
+            for (int i = 0; i < 5; i++) {
+                Movie movie = generateFakeMovie();
+                movie.setUserID(user_id);
+                movieRepository.save(movie);
             }
-        }
-
-        if (userRepository.count() == 12345) {
-            Faker faker = new Faker();
-
-            for (int i = 0; i < 100000; i++) {
-                User user = generateFakeUser();
-                userRepository.save(user);
-                for(int j = 0; j < 10000; j++)
-                {
-                    String[] genres = {"Action", "Adventure", "Comedy", "Drama", "Crime", "Romance", "Sci-Fi", "Thriller"};
-                    String genre = genres[faker.random().nextInt(genres.length)];
-                    String id = UUID.randomUUID().toString();
-
-                    Movie movie = new Movie(
-                            id,
-                            faker.book().title(),
-                            genre,
-                            faker.number().numberBetween(1850, 2024),
-                            "https://www.youtube.com/watch?v=" + faker.regexify("[A-Za-z0-9_-]{11}"),
-                            "https://www.imageplaceholder.com/" + faker.letterify("??????"),
-                            user.getId()
-                    );
-                    movieRepository.save(movie);
-                }
+            for (int i = 0; i < 5; i++) {
+                Movie movie = generateFakeMovie();
+                movie.setUserID(manager_id);
+                movieRepository.save(movie);
+            }
+            for (int i = 0; i < 5; i++) {
+                Movie movie = generateFakeMovie();
+                movie.setUserID(admin_id);
+                movieRepository.save(movie);
             }
         }
     }
