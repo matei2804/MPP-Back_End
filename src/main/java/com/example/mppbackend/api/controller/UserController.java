@@ -24,7 +24,6 @@ public class UserController {
         this.userService = userService;
     }
 
-    @CrossOrigin(origins = {"http://localhost:5173", "https://mpp-matei.up.railway.app"})
     @GetMapping("/user")
     public ResponseEntity<?> getUser(@RequestParam String id) {
         try {
@@ -35,7 +34,6 @@ public class UserController {
         }
     }
 
-    @CrossOrigin(origins = {"http://localhost:5173", "https://mpp-matei.up.railway.app"})
     @GetMapping("/userList")
     public ResponseEntity<?> getUserList(@RequestParam(required = false) boolean withRoles) {
         try {
@@ -51,7 +49,6 @@ public class UserController {
         }
     }
 
-    @CrossOrigin(origins = {"http://localhost:5173", "https://mpp-matei.up.railway.app"})
     @PostMapping(value = "/user", consumes = "application/json", produces = "application/json")
     public ResponseEntity<?> addUser(@RequestBody User user) {
         try {
@@ -66,7 +63,6 @@ public class UserController {
         }
     }
 
-    @CrossOrigin(origins = {"http://localhost:5173", "https://mpp-matei.up.railway.app"})
     @Secured("ROLE_ADMIN")
     @DeleteMapping("/user/{id}")
     public ResponseEntity<?> deleteUser(@PathVariable String id) {
@@ -78,7 +74,6 @@ public class UserController {
         } else return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User with id: " + id + " was not found!");
     }
 
-    @CrossOrigin(origins = {"http://localhost:5173", "https://mpp-matei.up.railway.app"})
     @Secured("ROLE_ADMIN")
     @PutMapping("/user/{id}")
     public ResponseEntity<?> updateUser(@PathVariable String id, @RequestBody User user) {
@@ -88,7 +83,6 @@ public class UserController {
         } else return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User with id: " + id + " was not found!");
     }
 
-    @CrossOrigin(origins = {"http://localhost:5173", "https://mpp-matei.up.railway.app"})
     @Secured("ROLE_ADMIN")
     @PutMapping("/user/updateUserRole/{email}")
     public ResponseEntity<?> updateUserRole(@PathVariable String email, @RequestBody Map<String, String> request) {

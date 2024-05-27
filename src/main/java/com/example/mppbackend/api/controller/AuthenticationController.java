@@ -30,7 +30,6 @@ public class AuthenticationController {
         this.tokenService = tokenService;
     }
 
-    @CrossOrigin(origins = {"http://localhost:5173", "https://mpp-matei.up.railway.app"})
     @PostMapping("/api/login")
     public ResponseEntity<?> loginUser(@RequestBody LoginRequest loginRequest) {
         boolean isAuthenticated = userService.checkUserLogin(loginRequest.getEmail(), loginRequest.getPassword());
