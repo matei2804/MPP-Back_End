@@ -47,7 +47,6 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> {
                     auth.requestMatchers("/api/login", "/user").permitAll();
                     auth.requestMatchers(HttpMethod.GET, "/api/**").hasAnyAuthority("ROLE_USER", "ROLE_MANAGER", "ROLE_ADMIN");
-                    auth.requestMatchers(HttpMethod.POST, "/api/**").hasAnyAuthority("ROLE_MANAGER", "ROLE_ADMIN");
                     auth.requestMatchers(HttpMethod.PUT, "/api/**").hasAnyAuthority("ROLE_MANAGER", "ROLE_ADMIN");
                     auth.requestMatchers(HttpMethod.DELETE, "/api/**").hasAnyAuthority("ROLE_MANAGER", "ROLE_ADMIN");
                     auth.anyRequest().authenticated();
@@ -58,7 +57,7 @@ public class SecurityConfig {
                             .invalidateHttpSession(true)
                             .deleteCookies("JSESSIONID");
                 })
-                .requiresChannel(channel -> channel.anyRequest().requiresSecure())  // Enforce HTTPS redirection
+               // .requiresChannel(channel -> channel.anyRequest().requiresSecure())  // Enforce HTTPS redirection
                 .oauth2ResourceServer(oauth2 -> oauth2
                         .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter()))
                 )

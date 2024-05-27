@@ -3,6 +3,7 @@ package com.example.mppbackend.repository;
 import com.example.mppbackend.api.models.Movie;
 import com.example.mppbackend.api.models.Role;
 import com.example.mppbackend.api.models.User;
+import com.example.mppbackend.service.UserService;
 import com.github.javafaker.Faker;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -15,12 +16,15 @@ import java.util.UUID;
 public class DatabaseLoader implements CommandLineRunner {
 
     private final UserRepository userRepository;
+
+    private final UserService userService;
     private final MovieRepository movieRepository;
     private final RoleRepository roleRepository;
     private final BCryptPasswordEncoder passwordEncoder;
 
-    public DatabaseLoader(UserRepository userRepository, MovieRepository movieRepository, RoleRepository roleRepository, BCryptPasswordEncoder passwordEncoder) {
+    public DatabaseLoader(UserRepository userRepository, UserService userService, MovieRepository movieRepository, RoleRepository roleRepository, BCryptPasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.userService = userService;
         this.movieRepository = movieRepository;
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
@@ -70,33 +74,29 @@ public class DatabaseLoader implements CommandLineRunner {
             Role managerRole = roleRepository.findByName("ROLE_MANAGER");
             Role adminRole = roleRepository.findByName("ROLE_ADMIN");
 
-            User admin = new User(UUID.randomUUID().toString(), "admin@admin.com", "admin", passwordEncoder.encode("admin"));
+            User admin = new User("1", "admin@admin.com", "admin", passwordEncoder.encode("admin"));
             admin.getRoles().add(adminRole);
             userRepository.save(admin);
 
-            User manager = new User(UUID.randomUUID().toString(), "manager@manager.com", "manager", passwordEncoder.encode("manager"));
+            User manager = new User("2", "manager@manager.com", "manager", passwordEncoder.encode("manager"));
             manager.getRoles().add(managerRole);
             userRepository.save(manager);
 
-            User user = new User(UUID.randomUUID().toString(), "user@user.com", "user", passwordEncoder.encode("user"));
+            User user = new User("3", "user@user.com", "user", passwordEncoder.encode("user"));
             user.getRoles().add(userRole);
             userRepository.save(user);
 
-            for (int i = 0; i < 100; i++) {
+            for (int i = 0; i < 30; i++) {
                 User fakeUser = generateFakeUser();
-                fakeUser.getRoles().add(userRole);
-                userRepository.save(fakeUser);
+                userService.addUser(fakeUser);
             }
         }
 
         if (movieRepository.count() == 0) {
-            Optional<User> user = userRepository.findByEmail("user@user.com");
-            Optional<User> manager = userRepository.findByEmail("manager@manager.com");
-            Optional<User> admin = userRepository.findByEmail("admin@admin.com");
 
-            String user_id = user.get().getId();
-            String manager_id = manager.get().getId();
-            String admin_id = admin.get().getId();
+            String user_id = "3";
+            String manager_id = "2";
+            String admin_id = "1";
 
             for (int i = 0; i < 5; i++) {
                 Movie movie = generateFakeMovie();

@@ -12,6 +12,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -51,13 +52,18 @@ public class UserController {
     }
 
     @CrossOrigin(origins = "http://localhost:5173")
-    @Secured("ROLE_ADMIN")
-    @PostMapping("/user")
+    @PostMapping(value = "/user", consumes = "application/json", produces = "application/json")
     public ResponseEntity<?> addUser(@RequestBody User user) {
-        boolean status = userService.addUser(user);
-        if (status) {
-            return ResponseEntity.status(HttpStatus.CREATED).body("User added successfully.");
-        } else return ResponseEntity.status(HttpStatus.CONFLICT).body("A user with the same id already exists.");
+        try {
+            boolean status = userService.addUser(user);
+            if (status) {
+                return ResponseEntity.status(HttpStatus.CREATED).body("User added successfully.");
+            } else {
+                return ResponseEntity.status(HttpStatus.CONFLICT).body("A user with the same id already exists.");
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred while adding the user.");
+        }
     }
 
     @CrossOrigin(origins = "http://localhost:5173")
@@ -81,4 +87,19 @@ public class UserController {
             return ResponseEntity.ok("User with id " + id + " was updated successfully.");
         } else return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User with id: " + id + " was not found!");
     }
+
+    @CrossOrigin(origins = "http://localhost:5173")
+    @Secured("ROLE_ADMIN")
+    @PutMapping("/user/updateUserRole/{email}")
+    public ResponseEntity<?> updateUserRole(@PathVariable String email, @RequestBody Map<String, String> request) {
+        String role = request.get("role");
+        boolean status = userService.addRoleToUser(email, role);
+
+        if (status) {
+            return ResponseEntity.ok(Map.of("email", email, "role", role));
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", "User with email " + email + " was not found!"));
+        }
+    }
+
 }

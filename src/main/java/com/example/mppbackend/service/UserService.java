@@ -8,10 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class UserService {
@@ -42,6 +40,11 @@ public class UserService {
     public boolean addUser(User user) {
         if (!userRepository.existsById(user.getId())) {
             user.setPassword(passwordEncoder.encode(user.getPassword()));
+            Role role = roleRepository.findByName("ROLE_USER");
+
+            Set<Role> roles = new HashSet<>();
+            roles.add(role);
+            user.setRoles(roles);
             userRepository.save(user);
             return true;
         }
@@ -81,22 +84,31 @@ public class UserService {
         return false;
     }
 
-    public void addRoleToUser(String email, String roleName) {
+    public boolean addRoleToUser(String email, String roleName) {
         Optional<User> optionalUser = userRepository.findByEmail(email);
+        boolean ok = false;
         if (optionalUser.isPresent()) {
             User user = optionalUser.get();
-            Role role = roleRepository.findByName(roleName);
-            if (role == null) {
-                role = new Role(roleName);
-                roleRepository.save(role);
+            Role role;
+            if (Objects.equals(roleName, "MANAGER")) {
+                role = roleRepository.findByName("ROLE_MANAGER");
+            } else if (Objects.equals(roleName, "USER")) {
+                role = roleRepository.findByName("ROLE_USER");
+            } else if (Objects.equals(roleName, "ADMIN")) {
+                role = roleRepository.findByName("ROLE_ADMIN");
+            } else {
+                role = roleRepository.findByName("ROLE_USER");
             }
-            Set<Role> roles = user.getRoles();
-            if (roles == null) {
-                roles = new HashSet<>();
-            }
+
+            Set<Role> roles = new HashSet<>();
             roles.add(role);
             user.setRoles(roles);
             userRepository.save(user);
+            ok = true;
+
+            System.out.println("User " + user.getEmail() + " roles updated to " + user.getRoles().stream().map(Role::getName).collect(Collectors.joining(", ")));
         }
+        return ok;
     }
+
 }

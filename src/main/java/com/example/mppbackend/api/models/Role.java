@@ -1,12 +1,15 @@
 package com.example.mppbackend.api.models;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 
 import java.util.Set;
 
 @Entity
 @Table(name = "Roles")
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class Role {
 
     @Id
@@ -17,7 +20,7 @@ public class Role {
     private String name;
 
     @ManyToMany(mappedBy = "roles")
-    @JsonBackReference
+    @JsonIgnore
     private Set<User> users;
 
     public Role() {
@@ -27,23 +30,23 @@ public class Role {
         this.name = name;
     }
 
-    public String getName() {
-        return name;
-    }
-
     public int getId() {
         return id;
+    }
+
+    public String getName() {
+        return name;
     }
 
     public Set<User> getUsers() {
         return users;
     }
 
-    public void setName(String newName) {
-        this.name = newName;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public void setUsers(Set<User> newUsers) {
-        this.users = newUsers;
+    public void setUsers(Set<User> users) {
+        this.users = users;
     }
 }
