@@ -18,6 +18,7 @@ import java.util.Collections;
 import java.util.Optional;
 import java.util.logging.Logger;
 
+@CrossOrigin(origins = {"http://localhost:5173", "https://mpp-matei.up.railway.app"})
 @RestController
 public class AuthenticationController {
 
