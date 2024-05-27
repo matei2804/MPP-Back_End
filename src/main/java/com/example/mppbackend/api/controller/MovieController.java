@@ -26,7 +26,7 @@ public class MovieController {
         this.movieService = movieService;
     }
 
-    @CrossOrigin(origins = "http://localhost:5173")
+    @CrossOrigin(origins = {"http://localhost:5173", "https://mpp-matei.up.railway.app"})
     @GetMapping("/movie")
     public ResponseEntity<?> getMovie(@RequestParam String id) {
         try {
@@ -37,7 +37,7 @@ public class MovieController {
         }
     }
 
-    @CrossOrigin(origins = "http://localhost:5173")
+    @CrossOrigin(origins = {"http://localhost:5173", "https://mpp-matei.up.railway.app"})
     @GetMapping("/movieList")
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_MANAGER', 'ROLE_ADMIN')")
     public ResponseEntity<?> getMovieList() {
@@ -62,7 +62,7 @@ public class MovieController {
         }
     }
 
-    @CrossOrigin(origins = "http://localhost:5173")
+    @CrossOrigin(origins = {"http://localhost:5173", "https://mpp-matei.up.railway.app"})
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
     @PostMapping("/movie")
     public ResponseEntity<?> addMovie(@RequestBody Movie movie) {
@@ -74,7 +74,7 @@ public class MovieController {
         }
     }
 
-    @CrossOrigin(origins = "http://localhost:5173")
+    @CrossOrigin(origins = {"http://localhost:5173", "https://mpp-matei.up.railway.app"})
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
     @DeleteMapping("/movie/{id}")
     public ResponseEntity<?> deleteMovie(@PathVariable String id) {
@@ -86,7 +86,7 @@ public class MovieController {
         }
     }
 
-    @CrossOrigin(origins = "http://localhost:5173")
+    @CrossOrigin(origins = {"http://localhost:5173", "https://mpp-matei.up.railway.app"})
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
     @PutMapping("/movie/{id}")
     public ResponseEntity<?> updateMovie(@PathVariable String id, @RequestBody Movie movie) {
@@ -98,7 +98,7 @@ public class MovieController {
         }
     }
 
-    @CrossOrigin(origins = "http://localhost:5173")
+    @CrossOrigin(origins = {"http://localhost:5173", "https://mpp-matei.up.railway.app"})
     @GetMapping("/movies/user/{id}")
     public ResponseEntity<?> getMoviesByUserId(@PathVariable String id) {
         try {
