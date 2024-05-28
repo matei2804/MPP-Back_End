@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-@CrossOrigin(origins = {"*"})
+@CrossOrigin(origins = {"http://localhost:5173"})
 @RestController
 public class UserController {
     private final UserService userService;

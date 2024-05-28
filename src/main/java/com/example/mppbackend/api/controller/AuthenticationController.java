@@ -18,7 +18,7 @@ import java.util.Collections;
 import java.util.Optional;
 import java.util.logging.Logger;
 
-@CrossOrigin(origins = {"*"})
+@CrossOrigin(origins = {"http://localhost:5173"})
 @RestController
 public class AuthenticationController {
 
